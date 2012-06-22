@@ -1087,7 +1087,7 @@ public class AtmosphereFramework implements ServletContextProvider {
                         InjectorProvider.getInjector().inject(handler);
                         addMapping("/" + handler.getClass().getSimpleName(),
                                 new AtmosphereHandlerWrapper(handler, "/" + handler.getClass().getSimpleName()));
-                        logger.info("Installed AtmosphereHandler {} mapped to context-path: {}", handler, handler.getClass().getName());
+                        logger.info("Installed AtmosphereHandler {} mapped to context-path: /{}", handler, handler.getClass().getSimpleName());
                     }
                 } catch (Throwable t) {
                     logger.trace("failed to load class as an AtmosphereHandler: " + className, t);
