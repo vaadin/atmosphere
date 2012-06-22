@@ -64,12 +64,10 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
     private final AtomicBoolean writeStatusAndHeader = new AtomicBoolean(false);
     private final boolean delegateToNativeResponse;
     private boolean destroyable;
-    private HttpServletResponse response;
     private boolean forceAsyncIOWriter = false;
 
     public AtmosphereResponse(AsyncIOWriter asyncIOWriter, AtmosphereRequest atmosphereRequest, boolean destroyable) {
         super(dsr);
-        response = dsr;
         this.asyncIOWriter = asyncIOWriter;
         this.atmosphereRequest = atmosphereRequest;
         this.writeStatusAndHeader.set(false);
@@ -80,7 +78,6 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
 
     public AtmosphereResponse(HttpServletResponse r, AsyncIOWriter asyncIOWriter, AtmosphereRequest atmosphereRequest, boolean destroyable) {
         super(r);
-        response = r;
         this.asyncIOWriter = asyncIOWriter;
         this.atmosphereRequest = atmosphereRequest;
         this.writeStatusAndHeader.set(false);
@@ -92,7 +89,6 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
     private AtmosphereResponse(Builder b) {
         super(b.atmosphereResponse);
 
-        response = b.atmosphereResponse;
         this.asyncIOWriter = b.asyncIOWriter;
         this.atmosphereRequest = b.atmosphereRequest;
         this.status = b.status;
@@ -162,7 +158,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
     }
 
     private HttpServletResponse _r() {
-        return HttpServletResponse.class.cast(response);
+        return HttpServletResponse.class.cast(getResponse());
     }
 
     public void destroy() {
@@ -198,7 +194,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
      */
     @Override
     public String encodeURL(String url) {
-        return response.encodeURL(url);
+        return _r().encodeURL(url);
     }
 
     /**
@@ -206,7 +202,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
      */
     @Override
     public String encodeRedirectURL(String url) {
-        return response.encodeRedirectURL(url);
+        return _r().encodeRedirectURL(url);
     }
 
     /**
@@ -214,7 +210,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
      */
     @Override
     public String encodeUrl(String url) {
-        return response.encodeURL(url);
+        return _r().encodeURL(url);
     }
 
     /**
@@ -222,7 +218,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
      */
     @Override
     public String encodeRedirectUrl(String url) {
-        return response.encodeRedirectURL(url);
+        return _r().encodeRedirectURL(url);
     }
 
     /**
@@ -448,7 +444,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
         if (!delegateToNativeResponse) {
             this.charSet = charSet;
         } else {
-            response.setCharacterEncoding(charSet);
+            getResponse().setCharacterEncoding(charSet);
         }
     }
 
@@ -457,7 +453,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
      */
     @Override
     public void flushBuffer() throws IOException {
-        response.flushBuffer();
+        getResponse().flushBuffer();
     }
 
     /**
@@ -465,7 +461,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
      */
     @Override
     public int getBufferSize() {
-        return response.getBufferSize();
+        return getResponse().getBufferSize();
     }
 
     /**
@@ -707,17 +703,17 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
 
     @Override
     public void reset() {
-        response.reset();
+        getResponse().reset();
     }
 
     @Override
     public void resetBuffer() {
-        response.resetBuffer();
+        getResponse().resetBuffer();
     }
 
     @Override
     public void setBufferSize(int size) {
-        response.setBufferSize(size);
+        getResponse().setBufferSize(size);
     }
 
     /**
@@ -897,13 +893,6 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
             return (AtmosphereResource) atmosphereRequest.getAttribute(FrameworkConfig.ATMOSPHERE_RESOURCE);
         } else {
             return null;
-        }
-    }
-
-    public void setResponse(ServletResponse response) {
-        super.setResponse(response);
-        if (HttpServletResponse.class.isAssignableFrom(response.getClass())) {
-            this.response = HttpServletResponse.class.cast(response);
         }
     }
 
@@ -1130,7 +1119,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
         if (cookies != null ? !cookies.equals(that.cookies) : that.cookies != null) return false;
         if (headers != null ? !headers.equals(that.headers) : that.headers != null) return false;
         if (locale != null ? !locale.equals(that.locale) : that.locale != null) return false;
-        if (response != null ? !response.equals(that.response) : that.response != null) return false;
+        if (getResponse() != null ? !getResponse().equals(that.getResponse()) : that.getResponse() != null) return false;
         if (statusMessage != null ? !statusMessage.equals(that.statusMessage) : that.statusMessage != null)
             return false;
         if (writeStatusAndHeader != null ? !writeStatusAndHeader.equals(that.writeStatusAndHeader) : that.writeStatusAndHeader != null)
@@ -1156,7 +1145,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
         result = 31 * result + (writeStatusAndHeader != null ? writeStatusAndHeader.hashCode() : 0);
         result = 31 * result + (delegateToNativeResponse ? 1 : 0);
         result = 31 * result + (destroyable ? 1 : 0);
-        result = 31 * result + (response != null ? response.hashCode() : 0);
+        result = 31 * result + (getResponse() != null ? getResponse().hashCode() : 0);
         return result;
     }
 
@@ -1178,7 +1167,7 @@ public class AtmosphereResponse extends HttpServletResponseWrapper {
                 ", writeStatusAndHeader=" + writeStatusAndHeader +
                 ", delegateToNativeResponse=" + delegateToNativeResponse +
                 ", destroyable=" + destroyable +
-                ", response=" + response +
+                ", response=" + getResponse() +
                 '}';
     }
 }

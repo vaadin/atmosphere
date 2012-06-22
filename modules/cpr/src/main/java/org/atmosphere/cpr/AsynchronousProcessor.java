@@ -91,7 +91,7 @@ public abstract class AsynchronousProcessor implements AsyncSupport<AtmosphereRe
     protected final ConcurrentHashMap<AtmosphereRequest, AtmosphereResource>
             aliveRequests = new ConcurrentHashMap<AtmosphereRequest, AtmosphereResource>();
     private boolean trackActiveRequest = false;
-    private final ScheduledExecutorService closedDetector = Executors.newScheduledThreadPool(1);
+    private ScheduledExecutorService closedDetector;
 
     public AsynchronousProcessor(AtmosphereConfig config) {
         this.config = config;
@@ -108,6 +108,8 @@ public abstract class AsynchronousProcessor implements AsyncSupport<AtmosphereRe
             final long maxInactiveTime = Long.parseLong(maxInactive);
             if (maxInactiveTime <= 0) return;
 
+            closedDetector = Executors.newScheduledThreadPool(1);
+             
             closedDetector.scheduleAtFixedRate(new Runnable() {
                 public void run() {
                     for (AtmosphereRequest req : aliveRequests.keySet()) {
@@ -582,7 +584,9 @@ public abstract class AsynchronousProcessor implements AsyncSupport<AtmosphereRe
     }
 
     protected void shutdown() {
-        closedDetector.shutdownNow();
+        if (closedDetector != null) {
+            closedDetector.shutdownNow();
+        }
         for (AtmosphereResource resource : aliveRequests.values()) {
             try {
                 resource.resume();

@@ -500,6 +500,7 @@ public class AtmosphereFramework implements ServletContextProvider {
 
             // http://java.net/jira/browse/ATMOSPHERE-157
             if (sc.getServletContext() != null) {
+                sc.getServletContext().setAttribute(AtmosphereFramework.class.getName(), this);
                 sc.getServletContext().setAttribute(BroadcasterFactory.class.getName(), broadcasterFactory);
             }
 
