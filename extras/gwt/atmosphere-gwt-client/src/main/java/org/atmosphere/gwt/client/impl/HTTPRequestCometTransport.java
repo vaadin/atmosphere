@@ -133,6 +133,7 @@ public class HTTPRequestCometTransport extends StreamingProtocolTransport {
                                 break;
                         }
                     } else {
+                        pollingTimer.cancel();
                         request.clearOnReadyStateChange();
                         if (request.getReadyState() != XMLHttpRequest.DONE) {
                             request.abort();
