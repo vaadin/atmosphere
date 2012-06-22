@@ -18,6 +18,7 @@
         <module>compat-tomcat</module>
         <module>compat-tomcat7</module>
         <module>compat-jbossweb</module>
+		<module>compat-gae</module>
         <module>cpr</module>
         <module>annotations</module>
         <module>jersey</module>

@@ -175,9 +175,8 @@ public class AtmosphereFramework implements ServletContextProvider {
             try {
                 if (BroadcasterFactory.getDefault() != null) {
                     this.broadcaster = BroadcasterFactory.getDefault().get(mapping);
-                } else {
-                    this.mapping = mapping;
                 }
+                this.mapping = mapping;
             } catch (Exception t) {
                 throw new RuntimeException(t);
             }
@@ -574,7 +573,7 @@ public class AtmosphereFramework implements ServletContextProvider {
     protected void configureBroadcaster() {
 
         try {
-            if (broadcasterFactoryClassName != null) {
+            if (broadcasterFactory == null && broadcasterFactoryClassName != null) {
                 broadcasterFactory = (BroadcasterFactory) Thread.currentThread().getContextClassLoader()
                         .loadClass(broadcasterFactoryClassName).newInstance();
             }

@@ -72,6 +72,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.atmosphere.container.ChannelApiAsyncSupport;
 
 /**
  * This is the default implementation of @link {AsyncSupportResolver}
@@ -95,6 +96,7 @@ public class DefaultAsyncSupportResolver implements AsyncSupportResolver {
     public final static String JBOSSWEB = "org.apache.catalina.connector.HttpEventImpl";
     public final static String GRIZZLY_WEBSOCKET = "com.sun.grizzly.websockets.WebSocketEngine";
     public final static String NETTY = "org.jboss.netty.channel.Channel";
+    public final static String APPENGINE = "com.google.appengine.api.LifecycleManager";
 
     private final AtmosphereConfig config;
 
@@ -153,6 +155,9 @@ public class DefaultAsyncSupportResolver implements AsyncSupportResolver {
 
                 if (testClassExists(NETTY))
                     add(NettyCometSupport.class);
+                
+                if (testClassExists(APPENGINE))
+                    add(ChannelApiAsyncSupport.class);
             }
         };
     }
