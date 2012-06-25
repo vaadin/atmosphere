@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.atmosphere.cpr.Action;
 import org.atmosphere.cpr.AsynchronousProcessor;
 import org.atmosphere.cpr.AtmosphereConfig;
-import org.atmosphere.cpr.AtmosphereFramework.AtmosphereHandlerWrapper;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
@@ -23,7 +22,6 @@ import org.atmosphere.cpr.AtmosphereResourceFactory;
 import org.atmosphere.cpr.AtmosphereResourceImpl;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
-import org.atmosphere.cpr.DefaultBroadcaster;
 import org.atmosphere.util.SimpleBroadcaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,20 +46,23 @@ public class ChannelApiAsyncSupport extends AsynchronousProcessor {
 
     public ChannelApiAsyncSupport(AtmosphereConfig config) {
         super(config);
-        String broadcasterClassName = SimpleBroadcaster.class.getName();
-        logger.info("Setting default broadcaster classname: " + broadcasterClassName);
-        config.framework().setDefaultBroadcasterClassName(broadcasterClassName);
-        config.framework().setBroadcasterFactory(null);
-        for (AtmosphereHandlerWrapper wr : config.framework().getAtmosphereHandlers().values()) {
-            if (wr.broadcaster != null 
-                    && DefaultBroadcaster.class.isAssignableFrom(wr.broadcaster.getClass())
-                    && wr.broadcaster.getID().equals(wr.mapping)) {
-                logger.info("Overriding default broadcaster of handler with path " + wr.mapping 
-                        + " with " + broadcasterClassName);
-                wr.broadcaster.destroy();
-                wr.broadcaster = config.framework().getBroadcasterFactory().get(wr.mapping);
-            }
-        }
+        // It would be nice if we could override the default broadcaster here
+        // but it is too late in the process and broadcasters which are created before we get here
+        // will fail on AppEngine
+//        String broadcasterClassName = SimpleBroadcaster.class.getName();
+//        logger.info("Setting default broadcaster classname: " + broadcasterClassName);
+//        config.framework().setDefaultBroadcasterClassName(broadcasterClassName);
+//        config.framework().setBroadcasterFactory(null);
+//        for (AtmosphereHandlerWrapper wr : config.framework().getAtmosphereHandlers().values()) {
+//            if (wr.broadcaster != null 
+//                    && !SimpleBroadcaster.class.isAssignableFrom(wr.broadcaster.getClass())
+//                    && wr.broadcaster.getID().equals(wr.mapping)) {
+//                logger.info("Overriding default broadcaster of handler with path " + wr.mapping 
+//                        + " with " + broadcasterClassName);
+//                wr.broadcaster.destroy();
+//                wr.broadcaster = config.framework().getBroadcasterFactory().get(wr.mapping);
+//            }
+//        }
     }
 
     @Override
@@ -90,12 +91,13 @@ public class ChannelApiAsyncSupport extends AsynchronousProcessor {
                 } else {
                     logger.debug("Suspending resource " + req.resource().uuid() + " with token " + token);
                 }
-                resp.setHeader("chapi_token", token);
+                resp.setContentType("text/html");
+                resp.getResponse().getWriter().write("{\"token\": \"" + token + "\"}");
             }
             return action;
         }
     }
-
+    
     @Override
     public void action(AtmosphereResourceImpl res) {
         super.action(res);
@@ -182,13 +184,17 @@ public class ChannelApiAsyncSupport extends AsynchronousProcessor {
     }
 
     protected void disconnected(AtmosphereResource resource, ChannelPresence presence) {
-        resource.getRequest().setRequest(null);
-        resource.getResponse().setResponse(null);
-        resource.resume();
+        try {
+            cancelled(resource.getRequest(), resource.getResponse());
+        } catch (IOException ex) {
+            logger.error("Failed to write to response", ex);
+        } catch (ServletException ex) {
+            logger.error("Failed to cancel resource", ex);
+        }
     }
-    
+        
     static boolean isAlive(AtmosphereResource res) {
-        return res.getResponse().getResponse() != null;
+        return res.isSuspended();
     }
     
     static void sendConnected(String uuid) {
