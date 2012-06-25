@@ -288,6 +288,7 @@ public class AtmosphereFramework implements ServletContextProvider {
             path = path + MAPPING_REGEX;
         }
 
+        w.mapping = path;
         atmosphereHandlers.put(path, w);
         return this;
     }
@@ -910,7 +911,7 @@ public class AtmosphereFramework implements ServletContextProvider {
                     IntrospectionUtils.addProperty(handler, handlerProperty.getName(), handlerProperty.getValue());
                 }
 
-                config.setSupportSession(!isJersey);
+                sessionSupport(!isJersey);
 
                 if (!atmoHandler.getSupportSession().equals("")) {
                     sessionSupport(Boolean.valueOf(atmoHandler.getSupportSession()));
