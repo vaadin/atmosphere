@@ -382,7 +382,8 @@ public class AtmosphereResourceImpl implements AtmosphereResource {
                 }
             }
 
-            if (req.getHeader(X_ATMOSPHERE_TRANSPORT) != null && !req.getHeader(X_ATMOSPHERE_TRANSPORT).equalsIgnoreCase("streaming")) {
+            if (req.getHeader(X_ATMOSPHERE_TRANSPORT) != null && !req.getHeader(X_ATMOSPHERE_TRANSPORT)
+                    .equalsIgnoreCase(HeaderConfig.STREAMING_TRANSPORT)) {
                 flushComment = false;
             }
 
