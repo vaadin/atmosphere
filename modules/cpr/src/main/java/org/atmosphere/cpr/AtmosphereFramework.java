@@ -994,9 +994,6 @@ public class AtmosphereFramework {
         logger.info("Atmosphere is using async support: {} running under container: {}",
                 getAsyncSupport().getClass().getName(), asyncSupport.getContainerName());
         logger.info("Atmosphere Framework {} started.", Version.getRawVersion());
-
-        logger.info("\n\n\tFor Atmosphere Framework Commercial Support, visit \n\t{} " +
-                "or send an email to {}\n", "http://www.async-io.org/", "support@async-io.org");
     }
 
     private void configureAnnotationPackages() {
