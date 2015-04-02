@@ -21,6 +21,7 @@ import org.atmosphere.cpr.AtmosphereConfig;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.WebSocketProcessorFactory;
+import org.atmosphere.util.IOUtils;
 import org.atmosphere.util.Utils;
 import org.atmosphere.websocket.WebSocketProcessor;
 import org.glassfish.grizzly.http.HttpRequestPacket;
@@ -47,7 +48,8 @@ public class GlassFishServ30WebSocketSupport extends Servlet30CometSupport {
     public GlassFishServ30WebSocketSupport(AtmosphereConfig config) {
         super(config);
         application = new Grizzly2WebSocketApplication(config);
-        WebSocketEngine.getEngine().register(application);
+        WebSocketEngine.getEngine().register(config.getServletContext().getContextPath(),
+                IOUtils.guestServletPath(config), application);
     }
 
 
@@ -87,7 +89,6 @@ public class GlassFishServ30WebSocketSupport extends Servlet30CometSupport {
     private static final class Grizzly2WebSocketApplication extends WebSocketApplication {
 
         private AtmosphereConfig config;
-        private final String contextPath;
         private final WebSocketProcessor webSocketProcessor;
 
         // -------------------------------------------------------- Constructors
@@ -95,7 +96,6 @@ public class GlassFishServ30WebSocketSupport extends Servlet30CometSupport {
 
         public Grizzly2WebSocketApplication(AtmosphereConfig config) {
             this.config = config;
-            contextPath = config.getServletContext().getContextPath();
             this.webSocketProcessor = WebSocketProcessorFactory.getDefault()
                     .getWebSocketProcessor(config.framework());
         }
@@ -108,11 +108,6 @@ public class GlassFishServ30WebSocketSupport extends Servlet30CometSupport {
             if (!webSocketProcessor.handshake(null)) {
                 throw new org.glassfish.grizzly.websockets.HandshakeException("WebSocket not accepted");
             }
-        }
-
-        @Override
-        public boolean isApplicationRequest(HttpRequestPacket request) {
-            return request.getRequestURI().startsWith(contextPath);
         }
 
         @Override
