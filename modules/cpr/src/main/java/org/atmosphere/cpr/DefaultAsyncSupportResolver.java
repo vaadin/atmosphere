@@ -167,12 +167,13 @@ public class DefaultAsyncSupportResolver implements AsyncSupportResolver {
                     if (testClassExists(GRIZZLY_WEBSOCKET))
                         add(GrizzlyServlet30WebSocketSupport.class);
 
-                    if (testClassExists(WEBLOGIC_WEBSOCKET) && !testClassExists(HK2)) {
-                        logger.warn("***************************************************************************************************");
-                        logger.warn("WebLogic WebSocket detected and will be deployed under the hardcoded path <<application-name>>/ws/*");
-                        logger.warn("***************************************************************************************************");
-                        add(WebLogicServlet30WithWebSocket.class);
-                    }
+                    // Use JSR 356 only for WebLogic as the native support does not work with Vaadin
+//                    if (testClassExists(WEBLOGIC_WEBSOCKET) && !testClassExists(HK2)) {
+//                        logger.warn("***************************************************************************************************");
+//                        logger.warn("WebLogic WebSocket detected and will be deployed under the hardcoded path <<application-name>>/ws/*");
+//                        logger.warn("***************************************************************************************************");
+//                        add(WebLogicServlet30WithWebSocket.class);
+//                    }
 
                     if (testClassExists(JSR356_WEBSOCKET))
                         add(JSR356AsyncSupport.class);
