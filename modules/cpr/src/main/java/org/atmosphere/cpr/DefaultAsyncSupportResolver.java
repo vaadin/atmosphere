@@ -172,12 +172,12 @@ public class DefaultAsyncSupportResolver implements AsyncSupportResolver {
                         if (testClassExists(GRIZZLY_WEBSOCKET))
                             add(GrizzlyServlet30WebSocketSupport.class);
 
-                        if (testClassExists(WEBLOGIC_WEBSOCKET) && !testClassExists(HK2)) {
-                            logger.warn("***************************************************************************************************");
-                            logger.warn("WebLogic WebSocket detected and will be deployed under the hardcoded path <<application-name>>/ws/*");
-                            logger.warn("***************************************************************************************************");
-                            add(WebLogicServlet30WithWebSocket.class);
-                        }
+//                        if (testClassExists(WEBLOGIC_WEBSOCKET) && !testClassExists(HK2)) {
+//                            logger.warn("***************************************************************************************************");
+//                            logger.warn("WebLogic WebSocket detected and will be deployed under the hardcoded path <<application-name>>/ws/*");
+//                            logger.warn("***************************************************************************************************");
+//                            add(WebLogicServlet30WithWebSocket.class);
+//                        }
                     }
                 } else {
                     if (testClassExists(JSR356_WEBSOCKET)) {
