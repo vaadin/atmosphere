@@ -161,21 +161,22 @@ public class DefaultAsyncSupportResolver implements AsyncSupportResolver {
                     if (testClassExists(JETTY_8))
                         add(JettyServlet30AsyncSupportWithWebSocket.class);
 
+                    if (testClassExists(JSR356_WEBSOCKET))
+                        add(JSR356AsyncSupport.class);
+                        
                     if (testClassExists(GRIZZLY2_WEBSOCKET))
                         add(GlassFishServ30WebSocketSupport.class);
 
                     if (testClassExists(GRIZZLY_WEBSOCKET))
                         add(GrizzlyServlet30WebSocketSupport.class);
 
-                    if (testClassExists(WEBLOGIC_WEBSOCKET) && !testClassExists(HK2)) {
-                        logger.warn("***************************************************************************************************");
-                        logger.warn("WebLogic WebSocket detected and will be deployed under the hardcoded path <<application-name>>/ws/*");
-                        logger.warn("***************************************************************************************************");
-                        add(WebLogicServlet30WithWebSocket.class);
-                    }
+//                        if (testClassExists(WEBLOGIC_WEBSOCKET) && !testClassExists(HK2)) {
+//                            logger.warn("***************************************************************************************************");
+//                            logger.warn("WebLogic WebSocket detected and will be deployed under the hardcoded path <<application-name>>/ws/*");
+//                            logger.warn("***************************************************************************************************");
+//                            add(WebLogicServlet30WithWebSocket.class);
+//                        }
 
-                    if (testClassExists(JSR356_WEBSOCKET))
-                        add(JSR356AsyncSupport.class);
                 } else {
                     if (testClassExists(TOMCAT_WEBSOCKET))
                         add(Tomcat7AsyncSupportWithWebSocket.class);
