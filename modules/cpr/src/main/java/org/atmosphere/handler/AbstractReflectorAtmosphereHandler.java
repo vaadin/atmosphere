@@ -18,6 +18,7 @@
 package org.atmosphere.handler;
 
 import org.atmosphere.cpr.ApplicationConfig;
+import org.atmosphere.cpr.AtmosphereConfig;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
@@ -50,7 +51,7 @@ public abstract class AbstractReflectorAtmosphereHandler implements AtmosphereHa
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractReflectorAtmosphereHandler.class);
 
-    private boolean twoStepsWrite = false;
+    private Boolean twoStepsWrite = false;
 
     /**
      * Write the {@link AtmosphereResourceEvent#getMessage()} back to the client using
@@ -187,7 +188,7 @@ public abstract class AbstractReflectorAtmosphereHandler implements AtmosphereHa
     }
 
     protected boolean useTwoStepWrite(AtmosphereResourceEvent event) {
-        return twoStepsWrite && event.getResource().transport() == AtmosphereResource.TRANSPORT.LONG_POLLING;
+        return isTwoStepsWriteEnabled(event) && event.getResource().transport() == AtmosphereResource.TRANSPORT.LONG_POLLING;
     }
 
     /**
@@ -222,10 +223,13 @@ public abstract class AbstractReflectorAtmosphereHandler implements AtmosphereHa
     public void destroy() {
     }
 
-    @Override
-    public void init(AtmosphereConfig config) throws ServletException {
-        twoStepsWrite = config.getInitParameter(ApplicationConfig.TWO_STEPS_WRITE, false);
-    }
+	private boolean isTwoStepsWriteEnabled(AtmosphereResourceEvent event) {
+		if (twoStepsWrite == null) {
+			AtmosphereConfig config = event.getResource().getAtmosphereConfig();
+			twoStepsWrite = config.getInitParameter(ApplicationConfig.TWO_STEPS_WRITE, false);
+		}
+		return twoStepsWrite;
+	}
 
     /**
      * <p>
