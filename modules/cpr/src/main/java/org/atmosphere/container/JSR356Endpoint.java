@@ -99,7 +99,7 @@ public class JSR356Endpoint extends Endpoint {
     }
 
     public JSR356Endpoint handshakeRequest(HandshakeRequest handshakeRequest) {
-        this.handshakeSession = (HttpSession) handshakeRequest.getHttpSession();
+        this.handshakeSession = (HttpSession)handshakeRequest .getHttpSession();
         this.handshakeHeaders = new HashMap<>();
         for (Map.Entry<String, List<String>> e : handshakeRequest.getHeaders()
                 .entrySet()) {
