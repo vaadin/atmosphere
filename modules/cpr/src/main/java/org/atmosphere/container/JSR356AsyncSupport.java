@@ -68,28 +68,47 @@ public class JSR356AsyncSupport extends Servlet30CometSupport {
         String servletPath = config.getInitParameter(ApplicationConfig.JSR356_MAPPING_PATH);
         if (servletPath == null) {
             servletPath = IOUtils.guestServletPath(config);
-            if (servletPath.equals("") || servletPath.equals("/") || servletPath.equals("/*")) {
-                servletPath = PATH +"}";
+            if (servletPath.equals("/") || servletPath.equals("/*")) {
+                servletPath = "";
             }
         }
         logger.info("JSR 356 Mapping path {}", servletPath);
         ServerEndpointConfig.Configurator configurator = IS_RUNNING_ON_QUARKUS ? new QuarkusAtmosphereConfigurator(config.framework())
                 : new AtmosphereConfigurator(config.framework());
 
+        // Register endpoints at
+        // /servletPath
+        // /servletPath/
+        // /servletPath/{path1}
+        // /servletPath/{path1}/{path2}
+        // etc with up to `pathLength` parameters 
+
         StringBuilder b = new StringBuilder(servletPath);
+        ArrayList<String> endpointPaths = new ArrayList<>();
+        endpointPaths.add(servletPath);
+        if (!servletPath.endsWith("/")) {
+            endpointPaths.add(servletPath+"/");
+        }
         for (int i = 0; i < pathLength; i++) {
+            b.append("/{path" + i + "}");
+            endpointPaths.add(b.toString());
+        }
+
+        for (String endpointPath : endpointPaths) {
+            if ("".equals(endpointPath)) {
+                // Spec says: The path is always non-null and always begins with a leading "/".
+                // Root mapping is covered by /{path1}
+                continue;
+            }
             try {
-                container.addEndpoint(ServerEndpointConfig.Builder.create(JSR356Endpoint.class, b.toString())
+                container.addEndpoint(ServerEndpointConfig.Builder.create(JSR356Endpoint.class, endpointPath)
                         .extensions(new ArrayList<>(container.getInstalledExtensions())).configurator(configurator).build());
             } catch (DeploymentException e) {
                 logger.warn("Duplicate Servlet Mapping Path {}. Use {} init-param to prevent this message", servletPath, ApplicationConfig.JSR356_MAPPING_PATH);
                 logger.trace("", e);
                 servletPath = IOUtils.guestServletPath(config);
                 logger.warn("Duplicate guess {}", servletPath, e);
-                b.setLength(0);
-                b.append(servletPath);
             }
-            b.append(PATH).append(i).append("}");
         }
     }
 
