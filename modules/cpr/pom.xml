@@ -213,19 +213,19 @@
         </dependency>
 
         <dependency>
-            <groupId>org.atmosphere</groupId>
+            <groupId>com.vaadin.external.atmosphere</groupId>
             <artifactId>atmosphere-compat-jbossweb</artifactId>
             <version>${compat-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.atmosphere</groupId>
+            <groupId>com.vaadin.external.atmosphere</groupId>
             <artifactId>atmosphere-compat-tomcat</artifactId>
             <version>${compat-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.atmosphere</groupId>
+            <groupId>com.vaadin.external.atmosphere</groupId>
             <artifactId>atmosphere-compat-tomcat7</artifactId>
             <version>${compat-version}</version>
             <scope>provided</scope>
