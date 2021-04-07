@@ -29,6 +29,14 @@
         </resources>
 
         <plugins>
+             <plugin>
+                <groupId>maven-pmd-plugin</groupId>
+                <artifactId>pmd</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -109,10 +117,6 @@
                 <exclusion>
                     <groupId>javax.servlet</groupId>
                     <artifactId>servlet-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>javax.servlet-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
