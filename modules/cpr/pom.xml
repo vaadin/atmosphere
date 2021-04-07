@@ -29,14 +29,6 @@
         </resources>
 
         <plugins>
-             <plugin>
-                <groupId>maven-pmd-plugin</groupId>
-                <artifactId>pmd</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>

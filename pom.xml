@@ -183,37 +183,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.13.0</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.atmosphere</groupId>
-                        <artifactId>atmosphere-buildtools</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <rulesets>
-                        <ruleset>atmosphere-pmd-ruleset.xml</ruleset>
-                    </rulesets>
-                    <sourceEncoding>UTF-8</sourceEncoding>
-                    <targetJdk>1.8</targetJdk>
-                    <linkXRef>false</linkXRef>
-                    <includeTests>true</includeTests>
-                    <verbose>true</verbose>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
