@@ -25,10 +25,13 @@ public class UUIDBroadcasterCacheThreadingTest {
         UUIDBroadcasterCache cache = new UUIDBroadcasterCache();
         cache.configure(config);
 
-        Thread t = new Thread(() -> {
-            for (int i = 0; i < NUM_MESSAGES; i++) {
-                BroadcastMessage broadcastMessage = createBroadcastMessage();
-                cache.addToCache(BROADCASTER_ID, CLIENT_ID, broadcastMessage);
+        Thread t = new Thread(new Runnable() {
+            @Override
+	    public void run() {
+	        for (int i = 0; i < NUM_MESSAGES; i++) {
+	            BroadcastMessage broadcastMessage = createBroadcastMessage();
+	            cache.addToCache(BROADCASTER_ID, CLIENT_ID, broadcastMessage);
+	        }
             }
         });
         t.start();
