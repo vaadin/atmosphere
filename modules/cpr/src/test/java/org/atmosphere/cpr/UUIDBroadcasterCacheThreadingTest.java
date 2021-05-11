@@ -22,7 +22,7 @@ public class UUIDBroadcasterCacheThreadingTest {
         AtmosphereConfig config = new AtmosphereFramework().getAtmosphereConfig();
         DefaultBroadcasterFactory factory = new DefaultBroadcasterFactory(DefaultBroadcaster.class, "NEVER", config);
         config.framework().setBroadcasterFactory(factory);
-        UUIDBroadcasterCache cache = new UUIDBroadcasterCache();
+        final UUIDBroadcasterCache cache = new UUIDBroadcasterCache();
         cache.configure(config);
 
         Thread t = new Thread(new Runnable() {
