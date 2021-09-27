@@ -203,6 +203,7 @@
                     <linkXRef>false</linkXRef>
                     <includeTests>true</includeTests>
                     <verbose>true</verbose>
+                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
