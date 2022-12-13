@@ -146,6 +146,13 @@
             </exclusions>
         </dependency>
         <dependency>
+        	<groupId>org.eclipse.jetty.websocket</groupId>
+        	<artifactId>websocket-jetty-server</artifactId>
+        	<version>${jetty10-version}</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-comet</artifactId>
             <version>${grizzly2-version}</version>
@@ -310,6 +317,13 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20180130</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-websocket</artifactId>
+            <version>7.6.10.v20130312</version>
+            <scope>provided</scope>
             <optional>true</optional>
         </dependency>
     </dependencies>
