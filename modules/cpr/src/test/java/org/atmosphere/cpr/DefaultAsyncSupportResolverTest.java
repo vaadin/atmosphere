@@ -29,7 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyListOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -76,7 +76,7 @@ public class DefaultAsyncSupportResolverTest {
                 .detectWebSocketPresent(useNativeIfPossible, useServlet30Async);
         doReturn(null)
                 .when(defaultAsyncSupportResolver)
-                .resolveNativeCometSupport(anyListOf(Servlet30CometSupport.class));
+                .resolveNativeCometSupport(<Servlet30CometSupport>anyList());
 
         Assert.assertEquals(
                 defaultAsyncSupportResolver.resolve(useNativeIfPossible, defaultToBlocking, useServlet30Async).getClass(),
@@ -103,7 +103,7 @@ public class DefaultAsyncSupportResolverTest {
                 .detectWebSocketPresent(useNativeIfPossible, useServlet30Async);
         doReturn(null)
                 .when(defaultAsyncSupportResolver)
-                .resolveNativeCometSupport(anyListOf(Servlet30CometSupport.class));
+                .resolveNativeCometSupport(<Servlet30CometSupport>anyList());
         doReturn(false)
                 .when(defaultAsyncSupportResolver)
                 .testClassExists(DefaultAsyncSupportResolver.SERVLET_30);
