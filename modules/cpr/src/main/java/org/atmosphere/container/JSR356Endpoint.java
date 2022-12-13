@@ -41,7 +41,6 @@ import javax.websocket.server.HandshakeRequest;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
