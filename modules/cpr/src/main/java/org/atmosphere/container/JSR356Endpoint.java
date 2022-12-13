@@ -39,7 +39,6 @@ import javax.websocket.Session;
 import javax.websocket.server.HandshakeRequest;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.Buffer;
@@ -268,41 +267,23 @@ public class JSR356Endpoint extends Endpoint {
             framework.addInitParameter(ALLOW_QUERYSTRING_AS_REQUEST, "true");
 
             if (session.isOpen()) {
-                // https://bz.apache.org/bugzilla/show_bug.cgi?format=multiple&id=57788
-                if (isWebsocket11Spec()) {
-                    session.addMessageHandler(new MessageHandler.Whole<String>() {
-                    	@Override
-                    	public void onMessage(String s) {
-                    		webSocketProcessor.invokeWebSocketProtocol(webSocket, s);
-                    	}
-                    });
-                    session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
-                        @Override
-                        public void onMessage(ByteBuffer bb) {
-                            byte[] b = bb.hasArray() ? bb.array() : new byte[bb.limit()];
-                            bb.get(b);
-                            webSocketProcessor.invokeWebSocketProtocol(webSocket, b, 0, b.length);
-                        }
-                    });
-                } else {
-                    // https://github.com/Atmosphere/atmosphere/issues/2478
-                    // Do not refactor
-                    session.addMessageHandler(new MessageHandler.Whole<String>() {
-                        @Override
-                        public void onMessage(String s) {
-                            webSocketProcessor.invokeWebSocketProtocol(webSocket, s);
-                        }
-                    });
+                // https://github.com/Atmosphere/atmosphere/issues/2478
+                // Do not refactor
+                session.addMessageHandler(new MessageHandler.Whole<String>() {
+                    @Override
+                    public void onMessage(String s) {
+                        webSocketProcessor.invokeWebSocketProtocol(webSocket, s);
+                    }
+                });
 
-                    session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
-                        @Override
-                        public void onMessage(ByteBuffer bb) {
-                            byte[] b = bb.hasArray() ? bb.array() : new byte[bb.limit()];
-                            bb.get(b);
-                            webSocketProcessor.invokeWebSocketProtocol(webSocket, b, 0, b.length);
-                        }
-                    });
-                }
+                session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
+                    @Override
+                    public void onMessage(ByteBuffer bb) {
+                        byte[] b = bb.hasArray() ? bb.array() : new byte[bb.limit()];
+                        bb.get(b);
+                        webSocketProcessor.invokeWebSocketProtocol(webSocket, b, 0, b.length);
+                    }
+                });
             } else {
                 logger.trace("Session closed during onOpen {}", session);
                 onClose(session, new CloseReason(CloseReason.CloseCodes.GOING_AWAY, "Session closed already"));
@@ -323,15 +304,6 @@ public class JSR356Endpoint extends Endpoint {
         }
 
     }
-
-    private static boolean isWebsocket11Spec(){
-        try {
-            Session.class.getMethod("addMessageHandler", Class.class, MessageHandler.Whole.class);
-            return true;
-        } catch (Throwable t) {
-            return false;
-        }
-    }    
 
     @Override
     public void onClose(javax.websocket.Session session, javax.websocket.CloseReason closeCode) {
