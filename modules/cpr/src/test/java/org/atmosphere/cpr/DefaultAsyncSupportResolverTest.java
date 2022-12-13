@@ -76,7 +76,7 @@ public class DefaultAsyncSupportResolverTest {
                 .detectWebSocketPresent(useNativeIfPossible, useServlet30Async);
         doReturn(null)
                 .when(defaultAsyncSupportResolver)
-                .resolveNativeCometSupport(ArgumentMatchers.<Servlet30CometSupport>anyList());
+                .resolveNativeCometSupport(ArgumentMatchers.<Class<? extends AsyncSupport>>anyList());
 
         Assert.assertEquals(
                 defaultAsyncSupportResolver.resolve(useNativeIfPossible, defaultToBlocking, useServlet30Async).getClass(),
@@ -103,7 +103,7 @@ public class DefaultAsyncSupportResolverTest {
                 .detectWebSocketPresent(useNativeIfPossible, useServlet30Async);
         doReturn(null)
                 .when(defaultAsyncSupportResolver)
-                .resolveNativeCometSupport(ArgumentMatchers.<Servlet30CometSupport>anyList());
+                .resolveNativeCometSupport(ArgumentMatchers.<Class<? extends AsyncSupport>>anyList());
         doReturn(false)
                 .when(defaultAsyncSupportResolver)
                 .testClassExists(DefaultAsyncSupportResolver.SERVLET_30);
