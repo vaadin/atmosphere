@@ -1547,7 +1547,7 @@ public class AtmosphereFramework {
 
         try {
             URL url = sc.getServletContext().getResource(handlersPath);
-            URLClassLoader urlC = new URLClassLoader(new URL[]{url},
+            ClassLoader urlC = url == null ? getClass().getClassLoader() : new URLClassLoader(new URL[]{url},
                     Thread.currentThread().getContextClassLoader());
             loadAtmosphereDotXml(sc.getServletContext().
                     getResourceAsStream(atmosphereDotXmlPath), urlC);
