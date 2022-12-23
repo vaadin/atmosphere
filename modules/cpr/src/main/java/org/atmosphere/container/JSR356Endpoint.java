@@ -266,6 +266,8 @@ public class JSR356Endpoint extends Endpoint {
             framework.addInitParameter(ALLOW_QUERYSTRING_AS_REQUEST, "true");
 
             if (session.isOpen()) {
+                // https://github.com/Atmosphere/atmosphere/issues/2478
+                // Do not refactor
                 session.addMessageHandler(new MessageHandler.Whole<String>() {
                     @Override
                     public void onMessage(String s) {

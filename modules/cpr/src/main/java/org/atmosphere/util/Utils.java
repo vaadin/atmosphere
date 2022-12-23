@@ -51,6 +51,16 @@ import static org.atmosphere.cpr.HeaderConfig.WEBSOCKET_UPGRADE;
  */
 public final class Utils {
 
+    private static boolean JDK_11_PLUS = false;
+    static {
+        try {
+            // Check if TestNG is on the classpath
+            Class.forName("java.net.http.HttpClient");
+            JDK_11_PLUS = true;
+        } catch (ClassNotFoundException aE) {
+        }
+    }
+
     /**
      * The logger.
      */
@@ -361,5 +371,9 @@ public final class Utils {
             path = "/";
         }
         return path;
+    }
+
+    public static boolean isUnderJDK11AndUp() {
+        return JDK_11_PLUS;
     }
 }
