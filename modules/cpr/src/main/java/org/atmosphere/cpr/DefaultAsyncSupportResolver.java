@@ -31,7 +31,6 @@ import org.atmosphere.container.Jetty7CometSupport;
 import org.atmosphere.container.Jetty93AsyncSupportWithWebSocket;
 import org.atmosphere.container.Jetty9AsyncSupportWithWebSocket;
 import org.atmosphere.container.JettyAsyncSupportWithWebSocket;
-import org.atmosphere.container.JettyCometSupport;
 import org.atmosphere.container.JettyServlet30AsyncSupportWithWebSocket;
 import org.atmosphere.container.NettyCometSupport;
 import org.atmosphere.container.Servlet30CometSupport;
@@ -64,7 +63,6 @@ public class DefaultAsyncSupportResolver implements AsyncSupportResolver {
     public final static String TOMCAT_WEBSOCKET = "org.apache.coyote.http11.upgrade.UpgradeInbound";
     public final static String TOMCAT = "org.apache.coyote.http11.Http11NioProcessor";
     public final static String JBOSS_5 = "org.jboss.";
-    public final static String JETTY = "org.mortbay.util.ajax.Continuation";
     public final static String JETTY_7 = "org.eclipse.jetty.servlet.ServletContextHandler";
     public final static String JETTY_8 = "org.eclipse.jetty.continuation.Servlet3Continuation";
     public final static String JETTY_9 = "org.eclipse.jetty.websocket.api.WebSocketPolicy";
@@ -127,9 +125,6 @@ public class DefaultAsyncSupportResolver implements AsyncSupportResolver {
 
                 if (!isJetty10 && testClassExists(JETTY_7))
                     add(Jetty7CometSupport.class);
-
-                if (!isJetty10 && testClassExists(JETTY))
-                    add(JettyCometSupport.class);
 
                 if (testClassExists(JBOSSWEB))
                     add(JBossWebCometSupport.class);
