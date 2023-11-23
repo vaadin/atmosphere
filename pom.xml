@@ -245,6 +245,7 @@
             <id>release-profile</id>
             <properties>
                 <skipTests>true</skipTests>
+                <flatten.maven.plugin.version>1.5.0</flatten.maven.plugin.version>
             </properties>
             <build>
                 <plugins>
@@ -301,6 +302,42 @@
                                         <source>src/main/webapp</source>
                                     </sources>
                                 </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>flatten-maven-plugin</artifactId>
+                        <version>${flatten.maven.plugin.version}</version>
+                        <inherited>true</inherited>
+                        <executions>
+                            <execution>
+                                <!-- Flatten and simplify our own POM for install/deploy -->
+                                <id>flatten</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>flatten</goal>
+                                </goals>
+                                <configuration>
+                                    <updatePomFile>true</updatePomFile>
+                                    <pomElements>
+                                        <parent>expand</parent>
+                                        <name>keep</name>
+                                        <description>keep</description>
+                                        <url>keep</url>
+                                        <properties>keep</properties>
+                                        <pluginManagement>keep</pluginManagement>
+                                        <dependencyManagement>keep</dependencyManagement>
+                                        <build>keep</build>
+                                    </pomElements>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>flatten-clean</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
                             </execution>
                         </executions>
                     </plugin>
