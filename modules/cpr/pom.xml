@@ -91,6 +91,10 @@
                             osgi.serviceloader;osgi.serviceloader=org.atmosphere.inject.Injectable
                         </Provide-Capability>
 						<Eclipse-BuddyPolicy>registered</Eclipse-BuddyPolicy>
+                        <!-- Same as the bundle symbolic name of the Vaadin build,
+                             not the name of upstream Atmosphere, which this
+                             fork does not replace -->
+                        <Automatic-Module-Name>com.vaadin.external.atmosphere.runtime</Automatic-Module-Name>
                     </instructions>
                 </configuration>
             </plugin>
