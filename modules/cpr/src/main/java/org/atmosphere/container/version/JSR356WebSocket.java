@@ -61,6 +61,11 @@ public class JSR356WebSocket extends WebSocket {
 
     @Override
     public WebSocket write(String s) throws IOException {
+        return write(s, s);
+    }
+
+    @Override
+    protected WebSocket write(String s, String original) throws IOException {
 
         if (!isOpen()) {
             throw new IOException("Socket closed {}");
@@ -70,7 +75,7 @@ public class JSR356WebSocket extends WebSocket {
         try {
             acquired = semaphore.tryAcquire(writeTimeout, TimeUnit.MILLISECONDS);
             if (acquired) {
-                session.getAsyncRemote().sendText(s, new WriteResult(resource(), s));
+                session.getAsyncRemote().sendText(s, new WriteResult(resource(), original));
             } else {
                 throw new IOException("Socket closed");
             }
@@ -85,6 +90,11 @@ public class JSR356WebSocket extends WebSocket {
 
     @Override
     public WebSocket write(byte[] data, int offset, int length) throws IOException {
+        return write(data, offset, length, data);
+    }
+
+    @Override
+    protected WebSocket write(byte[] data, int offset, int length, byte[] original) throws IOException {
 
         if (!isOpen()) {
             throw new IOException("Socket closed {}");
@@ -96,7 +106,7 @@ public class JSR356WebSocket extends WebSocket {
             if (acquired) {
                 ByteBuffer b = ByteBuffer.wrap(data, offset, length);
                 session.getAsyncRemote().sendBinary(b,
-                        new WriteResult(resource(), b.array()));
+                        new WriteResult(resource(), original));
             } else {
                 throw new IOException("Socket closed");
             }

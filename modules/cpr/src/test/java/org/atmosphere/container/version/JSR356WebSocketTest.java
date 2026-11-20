@@ -15,6 +15,15 @@
  */
 package org.atmosphere.container.version;
 
+import org.atmosphere.cache.BroadcastMessage;
+import org.atmosphere.cpr.AsyncIOInterceptorAdapter;
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.AtmosphereResponse;
+import org.atmosphere.cpr.AtmosphereResponseImpl;
+import org.atmosphere.cpr.Broadcaster;
+import org.atmosphere.cpr.BroadcasterCache;
+import org.atmosphere.cpr.BroadcasterConfig;
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeMethod;
@@ -24,15 +33,18 @@ import jakarta.websocket.RemoteEndpoint;
 import jakarta.websocket.SendHandler;
 import jakarta.websocket.SendResult;
 import jakarta.websocket.Session;
+import java.nio.charset.StandardCharsets;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import org.atmosphere.cpr.AtmosphereFramework;
 
@@ -41,6 +53,7 @@ public class JSR356WebSocketTest {
     private JSR356WebSocket webSocket;
     private Session session;
     private RemoteEndpoint.Async asyncRemoteEndpoint;
+    private BroadcasterCache broadcasterCache;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -100,6 +113,62 @@ public class JSR356WebSocketTest {
         webSocket.write("Hello2");
 
         verify(asyncRemoteEndpoint).sendText(eq("Hello2"), any(SendHandler.class));
+    }
+
+    @Test(timeOut = 1000)
+    public void failed_string_write_caches_message_before_interceptors() throws Exception {
+        AtmosphereResponse response = prepareLengthPrefixingWebSocket();
+        mockWriteResult(new SendResult(new RuntimeException("Fails")));
+
+        webSocket.write(response, "Hello");
+
+        verify(asyncRemoteEndpoint).sendText(eq("5|Hello"), any(SendHandler.class));
+        assertEquals(cachedMessage(), "Hello");
+    }
+
+    @Test(timeOut = 1000)
+    public void failed_bytes_write_caches_message_before_interceptors() throws Exception {
+        AtmosphereResponse response = prepareLengthPrefixingWebSocket();
+        mockWriteResult(new SendResult(new RuntimeException("Fails")));
+
+        byte[] data = "xHelloy".getBytes(StandardCharsets.UTF_8);
+        webSocket.write(response, data, 1, 5);
+
+        verify(asyncRemoteEndpoint).sendText(eq("5|Hello"), any(SendHandler.class));
+        assertEquals(cachedMessage(), "Hello");
+    }
+
+    private AtmosphereResponse prepareLengthPrefixingWebSocket() {
+        AtmosphereResponse response = AtmosphereResponseImpl.newInstance();
+        response.setCharacterEncoding("UTF-8");
+
+        broadcasterCache = mock(BroadcasterCache.class);
+        BroadcasterConfig broadcasterConfig = mock(BroadcasterConfig.class);
+        when(broadcasterConfig.getBroadcasterCache()).thenReturn(broadcasterCache);
+        Broadcaster broadcaster = mock(Broadcaster.class);
+        when(broadcaster.getID()).thenReturn("broadcaster");
+        when(broadcaster.getBroadcasterConfig()).thenReturn(broadcasterConfig);
+        AtmosphereResource resource = mock(AtmosphereResource.class);
+        when(resource.uuid()).thenReturn("uuid");
+        when(resource.getBroadcaster()).thenReturn(broadcaster);
+        when(resource.getResponse()).thenReturn(response);
+        webSocket.resource(resource);
+
+        // Frames messages the way TrackMessageSizeInterceptor does
+        webSocket.interceptor(new AsyncIOInterceptorAdapter() {
+            @Override
+            public byte[] transformPayload(AtmosphereResponse response, byte[] responseDraft, byte[] data) {
+                String text = new String(responseDraft, StandardCharsets.UTF_8);
+                return (text.length() + "|" + text).getBytes(StandardCharsets.UTF_8);
+            }
+        });
+        return response;
+    }
+
+    private Object cachedMessage() {
+        ArgumentCaptor<BroadcastMessage> message = ArgumentCaptor.forClass(BroadcastMessage.class);
+        verify(broadcasterCache, timeout(500)).addToCache(eq("broadcaster"), eq("uuid"), message.capture());
+        return message.getValue().message();
     }
 
     private void mockWriteResult(final SendResult sendResult) {
