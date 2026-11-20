@@ -46,6 +46,8 @@ public class JSR356WebSocket extends WebSocket {
     private final Semaphore semaphore = new Semaphore(1, true);// https://issues.apache.org/bugzilla/show_bug.cgi?id=56026
     private final int writeTimeout;
     private final AtomicBoolean closed = new AtomicBoolean();
+    // Passed through a thread local so that subclasses overriding write(String) keep seeing every write
+    private final ThreadLocal<Object> originalMessage = new ThreadLocal<>();
 
     public JSR356WebSocket(Session session, AtmosphereConfig config) {
         super(config);
@@ -61,11 +63,6 @@ public class JSR356WebSocket extends WebSocket {
 
     @Override
     public WebSocket write(String s) throws IOException {
-        return write(s, s);
-    }
-
-    @Override
-    protected WebSocket write(String s, String original) throws IOException {
 
         if (!isOpen()) {
             throw new IOException("Socket closed {}");
@@ -75,7 +72,7 @@ public class JSR356WebSocket extends WebSocket {
         try {
             acquired = semaphore.tryAcquire(writeTimeout, TimeUnit.MILLISECONDS);
             if (acquired) {
-                session.getAsyncRemote().sendText(s, new WriteResult(resource(), original));
+                session.getAsyncRemote().sendText(s, new WriteResult(resource(), messageToCache(s)));
             } else {
                 throw new IOException("Socket closed");
             }
@@ -90,11 +87,6 @@ public class JSR356WebSocket extends WebSocket {
 
     @Override
     public WebSocket write(byte[] data, int offset, int length) throws IOException {
-        return write(data, offset, length, data);
-    }
-
-    @Override
-    protected WebSocket write(byte[] data, int offset, int length, byte[] original) throws IOException {
 
         if (!isOpen()) {
             throw new IOException("Socket closed {}");
@@ -106,7 +98,7 @@ public class JSR356WebSocket extends WebSocket {
             if (acquired) {
                 ByteBuffer b = ByteBuffer.wrap(data, offset, length);
                 session.getAsyncRemote().sendBinary(b,
-                        new WriteResult(resource(), original));
+                        new WriteResult(resource(), messageToCache(b.array())));
             } else {
                 throw new IOException("Socket closed");
             }
@@ -117,6 +109,35 @@ public class JSR356WebSocket extends WebSocket {
             handleError(e, acquired);
         }
         return this;
+    }
+
+    @Override
+    protected WebSocket write(String data, String original) throws IOException {
+        originalMessage.set(original);
+        try {
+            return write(data);
+        } finally {
+            originalMessage.remove();
+        }
+    }
+
+    @Override
+    protected WebSocket write(byte[] data, int offset, int length, byte[] original) throws IOException {
+        originalMessage.set(original);
+        try {
+            return write(data, offset, length);
+        } finally {
+            originalMessage.remove();
+        }
+    }
+
+    /**
+     * The message to cache if sending {@code sent} fails: the message before the interceptors transformed it, when
+     * this write was started by {@link #write(String, String)} or {@link #write(byte[], int, int, byte[])}.
+     */
+    private Object messageToCache(Object sent) {
+        Object original = originalMessage.get();
+        return original != null ? original : sent;
     }
 
     private void handleError(Throwable e, boolean acquired) throws IOException {

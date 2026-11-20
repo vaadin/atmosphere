@@ -33,6 +33,7 @@ import jakarta.websocket.RemoteEndpoint;
 import jakarta.websocket.SendHandler;
 import jakarta.websocket.SendResult;
 import jakarta.websocket.Session;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -136,6 +137,27 @@ public class JSR356WebSocketTest {
 
         verify(asyncRemoteEndpoint).sendText(eq("5|Hello"), any(SendHandler.class));
         assertEquals(cachedMessage(), "Hello");
+    }
+
+    @Test(timeOut = 1000)
+    public void failed_binary_write_caches_message_before_interceptors() throws Exception {
+        AtmosphereResponse response = prepareLengthPrefixingWebSocket();
+        webSocket.binaryWrite(true);
+        final SendResult failure = new SendResult(new RuntimeException("Fails"));
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocationOnMock) {
+                ((SendHandler) invocationOnMock.getArguments()[1]).onResult(failure);
+                return null;
+            }
+        }).when(asyncRemoteEndpoint).sendBinary(any(ByteBuffer.class), any(SendHandler.class));
+
+        byte[] data = "xHelloy".getBytes(StandardCharsets.UTF_8);
+        webSocket.write(response, data, 1, 5);
+
+        verify(asyncRemoteEndpoint).sendBinary(eq(ByteBuffer.wrap("5|Hello".getBytes(StandardCharsets.UTF_8))),
+                any(SendHandler.class));
+        assertEquals((byte[]) cachedMessage(), "Hello".getBytes(StandardCharsets.UTF_8));
     }
 
     private AtmosphereResponse prepareLengthPrefixingWebSocket() {
