@@ -34,6 +34,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -165,6 +166,36 @@ public abstract class WebSocket extends AtmosphereInterceptorWriter implements K
         return lastWrite == -1 ? System.currentTimeMillis() : lastWrite;
     }
 
+    /**
+     * Write the text produced by the {@link org.atmosphere.cpr.AsyncIOInterceptor}s for a message. An implementation
+     * that caches messages it fails to deliver must cache {@code original}: a cached message goes through the
+     * interceptors again when it is replayed, so caching {@code data} would transform it twice.
+     *
+     * @param data     the text to send
+     * @param original the text before the interceptors transformed it
+     * @return this
+     * @throws IOException if the write fails
+     */
+    protected WebSocket write(String data, String original) throws IOException {
+        return write(data);
+    }
+
+    /**
+     * Write the bytes produced by the {@link org.atmosphere.cpr.AsyncIOInterceptor}s for a message. An implementation
+     * that caches messages it fails to deliver must cache {@code original}: a cached message goes through the
+     * interceptors again when it is replayed, so caching {@code data} would transform it twice.
+     *
+     * @param data     the bytes to send
+     * @param offset   the offset of the first byte to send
+     * @param length   the number of bytes to send
+     * @param original the bytes before the interceptors transformed them
+     * @return this
+     * @throws IOException if the write fails
+     */
+    protected WebSocket write(byte[] data, int offset, int length, byte[] original) throws IOException {
+        return write(data, offset, length);
+    }
+
     protected byte[] transform(byte[] b, int offset, int length) throws IOException {
         return transform(r.getResponse(), b, offset, length);
     }
@@ -198,21 +229,23 @@ public abstract class WebSocket extends AtmosphereInterceptorWriter implements K
 
         boolean transform = !filters.isEmpty() && r.getStatus() < 400;
         if (binaryWrite) {
-            byte[] b = data.getBytes(resource().getResponse().getCharacterEncoding());
+            byte[] original = data.getBytes(resource().getResponse().getCharacterEncoding());
+            byte[] b = original;
             if (transform) {
                 b = transform(r, b, 0, b.length);
             }
 
             if (b != null) {
-                write(b, 0, b.length);
+                write(b, 0, b.length, original);
             }
         } else {
+            String original = data;
             if (transform) {
                 byte[] b = data.getBytes(resource().getResponse().getCharacterEncoding());
                 data = new String(transform(r, b, 0, b.length), r.getCharacterEncoding());
             }
 
-            write(data);
+            write(data, original);
         }
         lastWrite = System.currentTimeMillis();
         return this;
@@ -243,22 +276,23 @@ public abstract class WebSocket extends AtmosphereInterceptorWriter implements K
         boolean transform = !filters.isEmpty() && r.getStatus() < 400;
         if (binaryWrite || resource().forceBinaryWrite()) {
             if (transform) {
+                byte[] original = Arrays.copyOfRange(b, offset, offset + length);
                 b = transform(r, b, offset, length);
-            }
-
-            if (b != null) {
+                if (b != null) {
+                    write(b, 0, b.length, original);
+                }
+            } else {
                 write(b, 0, b.length);
             }
         } else {
-            String data;
             String charset = r.getCharacterEncoding() == null ? "UTF-8" : r.getCharacterEncoding();
+            String original = new String(b, offset, length, charset);
+            String data = original;
             if (transform) {
                 data = new String(transform(r, b, offset, length), charset);
-            } else {
-                data = new String(b, offset, length, charset);
             }
 
-            write(data);
+            write(data, original);
         }
         lastWrite = System.currentTimeMillis();
         return this;
